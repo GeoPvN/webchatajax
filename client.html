@@ -1,0 +1,570 @@
+<html>
+<head>
+	<meta charset='UTF-8' />
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="bootstrap.min.js"></script>
+	<script type="text/javascript" src="MyWebSocket.js"></script>
+	<script type="text/javascript" src="jquery.timeago.js"></script>
+	<script type="text/javascript" src="ajaxfileupload.js"></script>
+	<link href="bootstrap.min.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" type="text/css" href="chat.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script>
+	
+	    $(document).ready(function() {
+	    	var divId = "log";
+	    	testr();
+	    	$('#footer_menu').prop('disabled', true);
+	    	
+	    	$('#mytime').val(getDateTime());
+	    	$.ajax({
+		        url: "setting.php",
+			    data: "",
+			    dataType: "json",
+		        success: function(data) {
+	    			$('#timeroff').val((parseInt(data.result[0].taimer)*60));
+	    			if(data.result[0].welcome_on_off == 1 && data.result[0].input_on_off == 0){
+						$("#" + divId).append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>'+data.result[0].welcome_text+'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+						jQuery("time.timeago").timeago();
+					}
+		        }
+	    	});
+			$('#btn-input').keypress(function(e) {
+				if (e.keyCode == 13 && this.value) {
+					$("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p><b>'+$('#chat_name').val()+'</b><br>'+ this.value +'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
+					
+					sendSms($(this).val());
+					$(this).val('');
+					jQuery("time.timeago").timeago();
+					$('#mytime').val(getDateTime());
+					$('#mytime').attr('client','0');
+					$('#liker').css('display','block');
+					$('#footer_menu').prop('disabled', false);
+				}
+			});
+			jQuery("time.timeago").timeago();
+			$.ajax({
+		        url: "setting.php",
+			    data: "act=check_ip",
+		        success: function(data) {
+		        	if(data == '0'){
+						$.ajax({
+					        url: "setting.php",
+						    data: "",
+						    dataType: "json",
+					        success: function(data) {
+					        	$('.panel-heading').css('background',data.result[0].color);
+					        	$('.panel-title').css('color',data.result[0].text_color);
+					        	
+					        	if(data.result[0].send_file == 1){
+					        		$('#choose_button').css('display','block');
+					        	}else{
+					        		$('#choose_button').css('display','none');
+					        	}
+								if(data.result[0].send_mail == 1){
+									$('#showmail').css('display','block');
+					        	}else{
+					        		$('#showmail').css('display','none');
+					        	}
+								if(data.result[0].send_sound == 1){
+									$('#sound_off_on').css('display','block');
+					        	}else{
+					        		$('#sound_off_on').css('display','none');
+					        	}
+								if(data.result[0].send_close == 1){
+									$('#close_chat').css('display','block');
+					        	}else{
+					        		$('#close_chat').css('display','none');
+					        	}
+								if(data.result[0].input_on_off == 1){
+									mail='';
+									name='';
+									phone='';
+									disp1='';
+									disp2='';
+									disp3='';
+									if(data.result[0].input_mail == 1){
+										mail = 'required';
+									}else{
+										disp1 = "display:none;";
+									}
+									if(data.result[0].input_name == 1){
+										name = 'required';
+									}else{
+										disp2 = "display:none;";
+									}
+									if(data.result[0].input_phone == 1){
+										phone = 'required';
+									}else{
+										disp3 = "display:none;";
+									}
+									$('#btn-input').prop('disabled', true);
+									$("#log").append('<input id="chat_name_input" style="margin-top: 10px;'+disp2+'" type="text" class="form-control input-sm chat_input" placeholder="სახელი" '+name+' />'
+				                    +'<input id="chat_mail_input" style="margin-top: 10px;'+disp1+'" type="text" class="form-control input-sm chat_input" placeholder="ელ-ფოსტა" '+mail+' />'
+				                    +'<input id="chat_phone_input" style="margin-top: 10px;'+disp3+'" type="text" class="form-control input-sm chat_input" placeholder="ტელეფონი" '+phone+' />'
+				                    +'<input id="btn_input" style="margin-top: 10px;" type="text" class="form-control input-sm chat_input" placeholder="შეიყვანეთ ტექსტი..." />'
+				                    +'<button id="send_my_info" style="margin-top: 10px; float: right;" class="btn btn-default">ჩატის დაწყება</button>');
+									$('#mytime').val(getDateTime());
+									$('#mytime').attr('client','0')
+								}
+						    }
+					    });
+		        	}else{
+		        		$('#btn-input').prop('disabled', true);
+		        		$("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p>თქვენი IP მისამართი დაბლოკილია!</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
+		        		$('.container').html('');
+		        	}
+		        }
+		    });
+			$('#mytime').val(getDateTime());
+			$('#mytime').attr('client','0');
+			timeout();
+	    });
+	    
+	    $(document).on("click", "#send_my_info", function () {
+	    	$.ajax({
+		        url: "setting.php",
+			    data: "",
+			    dataType: "json",
+		        success: function(data) {
+		        	if(data.result[0].input_mail == 1 || data.result[0].input_name == 1 || data.result[0].input_phone == 1){
+		        		checker = 0;
+		        		$( "#chat_mail_input" ).removeClass( "has-error" );
+		        		$( "#chat_name_input" ).removeClass( "has-error" );
+		        		$( "#chat_phone_input" ).removeClass( "has-error" );
+		        		$( "#btn_input" ).removeClass( "has-error" );
+		        		if(data.result[0].input_mail == 1 && $('#chat_mail_input').val() == ''){
+		        			checker = 1;
+		        			$( "#chat_mail_input" ).addClass( "has-error" );
+		        		}
+						if(data.result[0].input_name == 1 && $('#chat_name_input').val() == ''){
+							checker = 1;
+							$( "#chat_name_input" ).addClass( "has-error" );
+		        		}
+						if(data.result[0].input_phone == 1 && $('#chat_phone_input').val() == ''){
+							checker = 1;
+							$( "#chat_phone_input" ).addClass( "has-error" );
+		        		}
+						if($('#btn_input').val() == ''){
+							checker = 1;
+							$( "#btn_input" ).addClass( "has-error" );
+		        		}
+						if(checker == 0){
+							$('#btn-input').prop('disabled', false);
+					    	$('#chat_name').val($('#chat_name_input').val());
+							$('#chat_mail').val($('#chat_mail_input').val());
+							$('#chat_phone').val($('#chat_phone_input').val());
+							text = $('#btn_input').val();
+							$('#log').html('');
+							$("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p>'+$('#chat_name').val()+'<br>'+ text +'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
+							sendSms(text);
+							jQuery("time.timeago").timeago();
+							$('#mytime').val(getDateTime());
+							$('#mytime').attr('client','0');
+							$('#liker').css('display','block');
+							$('#footer_menu').prop('disabled', false);
+							timeout();
+						}
+		        	}else{
+		        		$('#btn-input').prop('disabled', false);
+				    	$('#chat_name').val($('#chat_name_input').val());
+						$('#chat_mail').val($('#chat_mail_input').val());
+						$('#chat_phone').val($('#chat_phone_input').val());
+						text = $('#btn_input').val();
+						$('#log').html('');
+						$("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p>'+$('#chat_name').val()+'<br>'+ text +'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
+						sendSms(text);
+						jQuery("time.timeago").timeago();
+						$('#mytime').val(getDateTime());
+						$('#mytime').attr('client','0');
+						$('#liker').css('display','block');
+						$('#footer_menu').prop('disabled', false);
+						timeout();
+		        	}
+		        }
+		    });
+	    });
+	    
+	    $(document).on("click", "#showmail", function () {
+	    	if($('#chat_original_id').val() != 0){
+	        	$("#log").append('<input id="enter_mail" style="margin-top: 10px;" type="text" class="form-control input-sm chat_input" placeholder="ელ-ფოსტა" />'
+                   +'<button id="send_mail" style="margin-top: 10px; float: right;" class="btn btn-default">ელ-ფოსტაზე გაგზავნა</button>');
+	        	document.getElementById( 'log' ).scrollTop = 25000000000;
+	    	}
+	    });
+	    
+	    $(document).on("click", "#send_mail", function () {
+	    	if($('#chat_original_id').val() != 0){
+		    	$.ajax({
+			        url: "setting.php",
+				    data: "act=send_mail&mail="+$('#enter_mail').val()+"&chat_original_id="+$('#chat_original_id').val(),
+				    dataType: "json",
+			        success: function(data) {
+			        	$("#log").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>მიმოწერა გაგზავნილია მითითებულ ელ-ფოსტაზე.</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+						jQuery("time.timeago").timeago();
+						$( "#enter_mail,#send_mail" ).remove();
+						document.getElementById( 'log' ).scrollTop = 25000000000;
+			        }
+		    	});
+	    	}
+	    });
+	    
+	    $(document).on("click", "#like", function () {
+	    	if($('#chat_original_id').val() != 0){
+		    	$.ajax({
+			        url: "setting.php",
+				    data: "act=like&value=1&chat_id="+$('#chat_original_id').val(),
+				    dataType: "json",
+			        success: function(data) {
+			        	$("#log").append('<input id="comment" style="margin-top: 10px;" type="text" class="form-control input-sm chat_input" placeholder="დატოვეთ კომენტარი" />'
+	                    +'<button id="send_comment" style="margin-top: 10px; float: right;" class="btn btn-default">კომენტარის დატოვება</button>');
+			        	document.getElementById( 'log' ).scrollTop = 25000000000;
+			        }
+		    	});
+	    	}
+	    });
+	    
+	    $(document).on("click", "#dislike", function () {
+	    	if($('#chat_original_id').val() != 0){
+		    	$.ajax({
+			        url: "setting.php",
+				    data: "act=like&value=2&chat_id="+$('#chat_original_id').val(),
+				    dataType: "json",
+			        success: function(data) {
+			        	$("#log").append('<input id="comment" style="margin-top: 10px;" type="text" class="form-control input-sm chat_input" placeholder="დატოვეთ კომენტარი" />'
+	                    +'<button id="send_comment" style="margin-top: 10px; float: right;" class="btn btn-default">კომენტარის დატოვება</button>');
+			        	document.getElementById( 'log' ).scrollTop = 25000000000;
+			        }
+		    	});
+	    	}
+	    });
+	    
+	    $(document).on("click", "#send_comment", function () {
+	    	if($('#chat_original_id').val() != 0){
+		    	$.ajax({
+			        url: "setting.php",
+				    data: "act=comment&value="+$('#comment').val()+"&chat_id="+$('#chat_original_id').val(),
+				    dataType: "json",
+			        success: function(data) {
+			        	$("#log").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>მადლობთ შეფასებისთვის.</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+						jQuery("time.timeago").timeago();
+						$( "#comment,#send_comment" ).remove();
+						document.getElementById( 'log' ).scrollTop = 25000000000;
+			        }
+		    	});
+	    	}
+	    });
+	    
+	    $(document).on("click", "#choose_button", function () {
+		    $("#choose_file1").click();
+		});
+	    $(document).on("click", "#drop-zone", function () {
+		    $("#choose_file1").click();
+		});
+		
+		
+	    $(document).on("change", "#choose_file", function () {
+	    	var file		= $(this).val();	    
+	    	var files 		= this.files[0];
+		    var name		= uniqid();
+		    var path		= "upload/";
+		    
+		    var ext = file.split('.').pop().toLowerCase();
+	        if($.inArray(ext, ['gif','png','webp','bmp','jpg', 'psd', 'pdf', 'docx', 'xlsx']) == -1) { //echeck file type
+	        	alert('This is not an allowed file type. allowed only gif, psd, png, webp, jpg, bmp, pdf, docx, xlsx');
+                this.value = '';
+	        }else{
+	        	file_name = files.name;
+	        	rand_file = name + "." + ext;
+	        	$.ajaxFileUpload({
+	    			url: "setting.php",
+	    			secureuri: false,
+	    			fileElementId: "choose_file",
+	    			dataType: 'json',
+	    			data:{
+						act: "upload_file",
+						path: path,
+						file_name: name,
+						chat_id: $('#chat_original_id').val(),
+						type: ext
+					},
+	    			success: function (data, status){
+	    				if(data == '1'){
+	    					ge = '<a href="upload/'+rand_file+'">'+rand_file+'</a>';
+	    					ge1 = '<a href="http://212.72.155.176:9990/upload/'+rand_file+'" target="_blank">'+rand_file+'</a>';
+	    				}else{
+	    					ge = '<img src="upload/'+rand_file+'" alt="pic">';
+	    					ge1 = '<a href="http://212.72.155.176:9990/upload/'+rand_file+'" target="_blank">'+rand_file+'</a>';
+	    				}
+	    				$("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p>'+$('#chat_name').val()+'<br>'+ge+'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
+	    				document.getElementById( 'log' ).scrollTop = 25000000000;
+	    				sendSms(ge1);
+	    			},
+    				error: function (data, status, e)
+    				{
+    					alert(e);
+    				}    				
+    			});
+	        }
+		});
+	    $(document).on("change", "#choose_file1", function () {
+	    	var file		= $(this).val();	    
+	    	var files 		= this.files[0];
+		    var name		= uniqid();
+		    var path		= "upload/";
+		    
+		    var ext = file.split('.').pop().toLowerCase();
+	        if($.inArray(ext, ['gif','png','webp','bmp','jpg', 'psd', 'pdf', 'docx', 'xlsx']) == -1) { //echeck file type
+	        	alert('This is not an allowed file type. allowed only gif, psd, png, webp, jpg, bmp, pdf, docx, xlsx');
+                this.value = '';
+	        }else{
+	        	file_name = files.name;
+	        	rand_file = name + "." + ext;
+	        	$.ajaxFileUpload({
+	    			url: "setting.php",
+	    			secureuri: false,
+	    			fileElementId: "choose_file1",
+	    			dataType: 'json',
+	    			data:{
+						act: "upload_file",
+						path: path,
+						file_name: name,
+						chat_id: $('#chat_original_id').val(),
+						type: ext
+					},
+	    			success: function (data, status){
+	    				if(data == '1'){
+	    					ge = '<a href="upload/'+rand_file+'">'+rand_file+'</a>';
+	    					ge1 = '<a href="http://212.72.155.176:9990/upload/'+rand_file+'" target="_blank">'+rand_file+'</a>';
+	    				}else{
+	    					ge = '<img src="upload/'+rand_file+'" alt="pic">';
+	    					ge1 = '<a href="http://212.72.155.176:9990/upload/'+rand_file+'" target="_blank">'+rand_file+'</a>';
+	    				}
+	    				$("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p>'+$('#chat_name').val()+'<br>'+ge+'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
+	    				document.getElementById( 'log' ).scrollTop = 25000000000;
+	    				sendSms(ge1);
+	    			},
+    				error: function (data, status, e)
+    				{
+    					alert(e);
+    				}    				
+    			});
+	        }
+		});
+	    $(document).on("click", "#sound_off_on", function () {
+		    if($('#SOnOff').val() == 1){
+		    	$(this).css('background-image','url("icon/sound_off.png")');
+		    	
+			    $('#SOnOff').val('0')
+		    }else{
+		    	$(this).css('background-image','url("icon/sound.png")');
+			    $('#SOnOff').val('1')
+		    }
+		});
+	    $(document).on("mouseover", "#sound_off_on", function () {
+	    	if($('#SOnOff').val() == 1){
+		    	$(this).css('background-image','url("icon/sound1.png")');
+		    }else{
+		    	$(this).css('background-image','url("icon/sound_off1.png")');
+		    }
+    	});
+	    
+	    $(document).on("mouseleave", "#sound_off_on", function () {
+	    	if($('#SOnOff').val() == 1){
+		    	$(this).css('background-image','url("icon/sound.png")');
+		    	$(this).css('background-size', '15px');
+		    }else{
+		    	$(this).css('background-image','url("icon/sound_off.png")');
+		    	$(this).css('background-size', '16px');
+		    }
+    	});
+	    
+	    
+	    $(document).on("click", "#close_chat", function () {
+	    	if($('.messages p').length==1){
+	    		
+	    	}else{
+	    	$.ajax({
+		        url: "setting.php",
+			    data: "act=close_chat&chat_id="+$('#chat_original_id').val(),
+			    dataType: "json",
+		        success: function(data) {
+		        	$("#log").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>თქვენ დატოვეთ ჩატი.</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+					document.getElementById( 'log' ).scrollTop = 25000000000;
+					$('#btn-input').prop('disabled', true);
+					$("#close_chat,#showmail,#choose_button,#sound_off_on").prop('disabled',true);
+		        }
+	    	});
+	    	}
+		});
+	    
+	    
+	    function timeout(){
+	    	setTimeout(function(){
+	    		var d2 = new Date(getDateTime());
+	    		var d1 = new Date($('#mytime').val());
+
+	    		var seconds =  (d2- d1)/1000;
+
+	    		if(parseInt(seconds) > parseInt($('#timeroff').val()) && $('#mytime').attr('client') == '1'){
+	    			$.ajax({
+				        url: "setting.php",
+					    data: "act=close_chat&chat_id="+$('#chat_original_id').val(),
+					    dataType: "json",
+				        success: function(data) {
+				        	$("#log").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>პასიურობის გამო თქვენი ჩატი დახურულია. მადლობა.</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+							document.getElementById( 'log' ).scrollTop = 25000000000;
+							$('#btn-input').prop('disabled', true);
+							$('#footer_menu').prop('disabled', true);
+				        }
+			    	});
+	    		}else{
+	    			$.ajax({
+				        url: "setting.php",
+					    data: "act=chat_check&chat_id="+$('#chat_original_id').val(),
+					    dataType: "json",
+				        success: function(data) {
+				        	
+				        	if($('#chat_detail_id').val() == 0 && data.result != null){
+				        		$("#log").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p><b>'+data.result[0].op_name+'</b><br>'+data.result[0].message_operator+'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+				        		document.getElementById( 'log' ).scrollTop = 25000000000;
+				        		$('#chat_detail_id').val(data.result[0].id)
+				        	}else{
+				        		if(data.result != null){
+				        			if($('#chat_detail_id').val() != data.result[0].id){
+				        			$("#log").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p><b>'+data.result[0].op_name+'</b><br>'+data.result[0].message_operator+'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+					        		document.getElementById( 'log' ).scrollTop = 25000000000;
+					        		$('#chat_detail_id').val(data.result[0].id);
+				        			}
+				        		}
+				        	}
+				        }
+			    	});
+	    			timeout();
+	    		}
+	    		
+	    		}, 1000);
+	    	testr();
+	    }
+
+	    function testr() {
+	        var dropZoneId = "chat_window_1";
+	        var buttonId = "clickHere";
+	        var mouseOverClass = "mouse-over";
+
+	        var dropZone = $("#" + dropZoneId);
+	        var ooleft = dropZone.offset().left;
+	        var ooright = dropZone.outerWidth() + ooleft;
+	        var ootop = dropZone.offset().top;
+	        var oobottom = dropZone.outerHeight() + ootop;
+	        var inputFile = dropZone.find('input[type="file"]');
+	        var inputFile1 = dropZone.find('div[id="oioi"]');
+	        document.getElementById(dropZoneId).addEventListener("dragover", function (e) {
+	            e.preventDefault();
+	            e.stopPropagation();
+	            dropZone.addClass(mouseOverClass);
+	            var x = e.pageX;
+	            var y = e.pageY;
+
+	            if (!(x < ooleft || x > ooright || y < ootop || y > oobottom)) {
+	                inputFile.offset({ top: y - 0, left: x - 5 });
+	                inputFile1.offset({ top: y - 70, left: x - 100 });
+	            } else {
+	                inputFile.offset({ top: -9000, left: -300 });
+	                inputFile1.offset({ top: -9000, left: -300 });
+	            }
+
+	        }, true);
+
+
+	        document.getElementById(dropZoneId).addEventListener("drop", function (e) {
+	            $("#" + dropZoneId).removeClass(mouseOverClass);
+	            $("#choose_file").css('top','-9000px');
+	            $('#oioi').css('top','-9000px');
+	        }, true);
+
+	    }
+	    
+	    $(function(){
+	        var windowH = $(window).height();
+	        var wrapperH = $('#log').height();
+	        if(windowH > wrapperH) {                            
+	            $('#log').css({'height':($(window).height()-121)+'px'});
+	        }                                                                               
+	        $(window).resize(function(){
+	        	$('#log').css({'height':($(window).height()-121)+'px'});
+	        })          
+	    });
+	    
+	    $(document).on("click", "#sendbtn", function () {
+	    	if($('#btn-input').val() !=''){
+	    		var vl = $('#btn-input').val();
+			    $("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p><b>'+$('#chat_name').val()+'</b><br>'+ vl +'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
+			    sendSms(vl);
+				$('#btn-input').val('');
+				jQuery("time.timeago").timeago();
+				$('#mytime').val(getDateTime());
+				$('#mytime').attr('client','0');
+				$('#liker').css('display','block');
+				$('#footer_menu').prop('disabled', false);
+	    	}
+	    });
+	</script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="row chat-window col-xs-5 col-md-3" id="chat_window_1">
+        <div class="col-xs-12 col-md-22" style="border: none; border-radius:0px;">
+        	<div class="panel panel-default" style="border: none;border-radius:0px;">
+                <div class="panel-heading top-bar" style="border-radius: 0px;overflow: visible; height: 40px;padding: 3px;padding-right: 16px;padding-left: 16px;">
+                    <div class="col-md-8 col-xs-8" style="width: 100%;padding: 0px;margin-top: 6px;">
+                    	<div id="chat_icon"></div>
+	                    <h3 class="panel-title" style="">ონლაინ დახმარება</h3>
+					    <div id="close_chat"></div>
+					    <div id="sound_off_on"></div>
+					    <div id="choose_button"></div>
+					    <div id="showmail"></div>
+                     </div>
+                </div>
+                <div class="panel-body msg_container_base" id="log">
+                    
+                    
+                </div>
+                <div class="panel-footer text_footer" id="in1" style="border-radius: 0px;">
+                    <div class="input-group" id="in2">
+                        <input id="btn-input" type="text" class="" placeholder="შეიყვანეთ ტექსტი" />
+                        <button type="button" class="btn btn-default" style="position: absolute;right: 0px;padding: 4px;" id="sendbtn"></button>
+						        <div id="oioi" style="height:50px;width:200px;position: absolute;top: -9000px;border: 1px solid #eee;background: #fff;padding: 5px 10px;border-radius: 2px;color: #666;font-size: 16px;font-family: pvn;">
+						        ფაილი ჩააგდეთ აქ!<input id="choose_file" name="choose_file" type="file" class="file" style="font-size: 0px;position: absolute;top: -9000px;">
+						        </div>
+						
+                        
+                    </div>
+                </div>
+                <div class="panel-footer" style="padding: 0;padding-bottom: 2px;overflow: hidden;border-radius: 0px;" id="in3">
+                    <div class="input-group" style="float: right; width: auto;margin-top: 3px;margin-right: 5px;">
+                        <a href="http://callapp.ge/" target="_blank">CHAT APP</a>
+                    </div>
+			    </div>
+    		</div>
+        </div>
+    </div>
+</div>
+<input type="hidden" value="0" id="chat_original_id">
+<input type="hidden" value="0" id="chat_detail_id">
+<input type="hidden" value="სტუმარი" id="chat_name">
+<input type="hidden" value="" id="chat_mail">
+<input type="hidden" value="" id="chat_phone">
+<input id="choose_file1" name="choose_file" type="file" class="file" style="display: none;">
+<input type="hidden" value="1" id="SOnOff">
+<input type="hidden" value="" id="mytime" client="0">
+<input type="hidden" value="" id="timeroff">
+
+</body>
+
+</html>
