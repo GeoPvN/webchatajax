@@ -14,6 +14,7 @@
 	
 	    $(document).ready(function() {
 	    	var divId = "log";
+	    	var ch = 0;
 	    	testr();
 	    	$('#footer_menu').prop('disabled', true);
 	    	
@@ -404,7 +405,7 @@
 	    	setTimeout(function(){
 	    		var d2 = new Date(getDateTime());
 	    		var d1 = new Date($('#mytime').val());
-	    		var ch = 0;
+	    		
 
 	    		var seconds =  (d2- d1)/1000;
 	    		
