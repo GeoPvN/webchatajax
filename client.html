@@ -13,6 +13,8 @@
 	<script>
 	
 	    $(document).ready(function() {
+	    	var username = getUrlParameter('username');
+	    	$('#chat_name').val(username);
 	    	var divId = "log";
 	    	testr();
 	    	$('#footer_menu').prop('disabled', true);
@@ -518,6 +520,24 @@
 				$('#footer_menu').prop('disabled', false);
 	    	}
 	    });
+	    
+	    var getUrlParameter = function getUrlParameter(sParam) {
+	        var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+	            sURLVariables = sPageURL.split('&'),
+	            sParameterName,
+	            i;
+
+	        for (i = 0; i < sURLVariables.length; i++) {
+	            sParameterName = sURLVariables[i].split('=');
+
+	            if (sParameterName[0] === sParam) {
+	                return sParameterName[1] === undefined ? true : sParameterName[1];
+	            }
+	        }
+	    };
+
+
+	    
 	</script>
 
 </head>
@@ -563,6 +583,7 @@
         </div>
     </div>
 </div>
+
 <input type="hidden" value="0" id="chat_original_id">
 <input type="hidden" value="0" id="chat_detail_id">
 <input type="hidden" value="სტუმარი" id="chat_name">
