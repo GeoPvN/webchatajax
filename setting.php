@@ -29,8 +29,10 @@ if($_REQUEST[act] == 'check_ip'){
     $mysqli->execQuery();
 }elseif($_REQUEST[act] == 'chat_check'){
     $mysqli->setQuery(" SELECT  chat_details.id,`message_operator`,
-                                IF(ISNULL(chat_nikname.`name`),'ოპერატორი',`chat_nikname`.`name`) AS `op_name`
+                                IF(ISNULL(chat_nikname.`name`),'ოპერატორი',`chat_nikname`.`name`) AS `op_name`,
+                                `chat`.`status`
                         FROM    `chat_details`
+                        JOIN `chat` ON chat_details.chat_id = chat.id
                         LEFT JOIN `chat_nikname` ON chat_details.operator_user_id = chat_nikname.crystal_users_id
                         WHERE   `chat_details`.`chat_id` = '$_REQUEST[chat_id]' AND chat_details.operator_user_id > 0 ORDER BY chat_details.id DESC LIMIT 1");
  
