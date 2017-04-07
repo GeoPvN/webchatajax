@@ -437,27 +437,20 @@
 					        		document.getElementById( 'log' ).scrollTop = 25000000000;
 					        		$('#chat_detail_id').val(data.result[0].id);
 				        			}
-				        			
+				        			if(data.result[0].status > 2){
+						        		$("#log").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>თქვენ დატოვეთ ჩატი.</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+										document.getElementById( 'log' ).scrollTop = 25000000000;
+										$('#btn-input,#sendbtn').prop('disabled', true);
+										$("#close_chat,#showmail,#choose_button,#sound_off_on").prop('disabled',true);
+										return false;
+						        	}
 				        		}
 				        	}
 				        	
-				        	if(data.result != null){
-				        		if(data.result[0].status > 2){
-				        		$("#log").append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>თქვენ დატოვეთ ჩატი.</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
-								document.getElementById( 'log' ).scrollTop = 25000000000;
-								$('#btn-input,#sendbtn').prop('disabled', true);
-								$("#close_chat,#showmail,#choose_button,#sound_off_on").prop('disabled',true);
-								return false;
-				        		}
-				        	}else{
-				        		if(data.result[0].status < 2){
-				        			timeout();
-				        		}
-				        		
-				        	}
+				        	
 				        }
 			    	});
-	    			
+	    			timeout();
 	    		}
 	    		
 	    		}, 1000);
