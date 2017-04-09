@@ -28,6 +28,8 @@ if($_REQUEST[act] == 'check_ip'){
     
     $mysqli->execQuery();
 }elseif($_REQUEST[act] == 'chat_check'){
+    $mysqli->setQuery(" UPDATE `chat` SET `last_request_datetime`=NOW() WHERE (`id`='$_REQUEST[chat_id]');");
+    $mysqli->execQuery();
     $mysqli->setQuery(" SELECT  chat_details.id,`message_operator`,
                                 IF(ISNULL(chat_nikname.`name`),'ოპერატორი',`chat_nikname`.`name`) AS `op_name`,
                                 `chat`.`status`
