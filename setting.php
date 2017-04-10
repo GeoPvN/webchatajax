@@ -15,6 +15,34 @@ if($_REQUEST[act] == 'check_ip'){
         $next = 1;
     }
     echo $next;
+}elseif($_REQUEST[act] == 'check_client'){
+    $ip = get_client_ip();
+    $name = $_REQUEST['name'];
+    $chat_id = 0;
+    $chat_detail_id = 0;
+    $sms = '';
+    $myquery = $mysqli->setQuery("  SELECT  `chat_id`,
+                                			`chat_details`.`id`,
+                            				`chat_details`.`message_datetime`,
+                                            `chat_details`.`message_operator`,
+                                            `chat_details`.`message_client`,
+                                            `chat_nikname`.`name`
+                                     FROM 	`chat`
+                                     JOIN 	`chat_details` ON chat.id = chat_details.chat_id
+                                     LEFT JOIN chat_nikname ON chat_details.operator_user_id = chat_nikname.crystal_users_id
+                                     WHERE  `chat`.`name` = '$name' AND chat.ip = '$ip' AND chat.`status` NOT IN (3,4)");
+    $json = $mysqli->getResultArray();
+    for($i = 0;$i < $json[count];$i++){
+        if($json[result][$i][message_operator] == ''){
+            $sms .= '<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p><b>'.$name.'</b><br>'.$json[result][$i][message_client].'</p><time class="timeago" datetime="'.$json[result][$i][message_datetime].'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>';
+        }else{
+            $sms .= '<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p><b>'.$json[result][$i][name].'</b><br>'.$json[result][$i][message_operator].'</p><time class="timeago" datetime="'.$json[result][$i][message_datetime].'"></time></div></div></div>';
+        }
+        $chat_id = $json[result][$i][chat_id];
+        $chat_detail_id = $json[result][$i][id];
+    }
+    $data = array('sms'=>$sms,'chat_id'=>$chat_id,'chat_detail_id'=>$chat_detail_id);
+    echo json_encode($data);
 }elseif($_REQUEST[act] == 'like'){
     $mysqli->setQuery(" UPDATE  `chat` SET
                                 `vote`='$_REQUEST[value]'

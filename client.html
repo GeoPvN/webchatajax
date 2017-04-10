@@ -22,14 +22,30 @@
 	    	$('#mytime').val(getDateTime());
 	    	$.ajax({
 		        url: "setting.php",
-			    data: "",
+			    data: "act=check_client&name="+username,
 			    dataType: "json",
 		        success: function(data) {
-	    			$('#timeroff').val((parseInt(data.result[0].taimer)*60));
-	    			if(data.result[0].welcome_on_off == 1 && data.result[0].input_on_off == 0){
-						$("#" + divId).append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>'+data.result[0].welcome_text+'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
-						jQuery("time.timeago").timeago();
-					}
+		        	if(data.chat_id != 0){
+		        		$('#chat_original_id').val(data.chat_id);
+		        		$('#chat_detail_id').val(data.chat_detail_id);
+		        		$('#log').html(data.sms);
+		        		jQuery("time.timeago").timeago();
+		        		document.getElementById( 'log' ).scrollTop = 25000000000;
+		        	}else{
+		        		$.ajax({
+		    		        url: "setting.php",
+		    			    data: "",
+		    			    dataType: "json",
+		    		        success: function(data) {
+		    	    			$('#timeroff').val((parseInt(data.result[0].taimer)*60));
+		    	    			if(data.result[0].welcome_on_off == 1 && data.result[0].input_on_off == 0){
+		    						$("#" + divId).append('<div class="row msg_container base_receive"><div class="col-md-2 col-xs-1 avatar"><img src="female.png" class=" img-responsive "></div><div class="col-md-20 col-xs-12"><div class="messages msg_receive"><p>'+data.result[0].welcome_text+'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div></div>');
+		    						jQuery("time.timeago").timeago();
+		    					}
+		    		        }
+		    	    	});
+		        	}
+	    			
 		        }
 	    	});
 			$('#btn-input').keypress(function(e) {
