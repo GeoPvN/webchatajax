@@ -55,6 +55,7 @@ $mysqli = new dbClass();
     }
     
     if($idd == 1){
+        if($esc_message != ''){
         $mysqli->setQuery(" UPDATE  `chat` SET
                                     `last_person`='0'
                             WHERE   `id`='$chat_id';");
@@ -65,7 +66,9 @@ $mysqli = new dbClass();
                             ('$chat_id', '$esc_message', '', '', NOW());");
         
         $mysqli->execQuery();
+        }
     }else{
+        if($esc_message != ''){
         $mysqli->setQuery(" UPDATE  `chat` SET
                                     `last_person`='1'
                             WHERE   `id`='$chat_id';");
@@ -76,6 +79,7 @@ $mysqli = new dbClass();
                             ('$chat_id', '', '$esc_message', '$user_id', NOW());");
         
         $mysqli->execQuery();
+        }
     }
 
     function get_client_ip() {
