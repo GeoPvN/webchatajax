@@ -40,7 +40,7 @@ body{
 	padding-top: 11px;
     padding-left: 18px;
 	font-family: pvn2;
-	color: #ccc;
+	color: #000;
 }
 ::-webkit-input-placeholder { /* WebKit, Blink, Edge */
     color:    #ccc;
