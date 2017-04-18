@@ -35,7 +35,9 @@ body{
     border: none;
     border-radius: 0px;
     height: 40px;
-    width: 100%;
+    width: 86%;
+	resize: none;
+	padding-top: 11px;
     padding-left: 18px;
 	font-family: pvn2;
 	color: #ccc;
