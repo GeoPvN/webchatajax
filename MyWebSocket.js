@@ -87,6 +87,7 @@ function sendSms(sms){
 			if (window.navigator.userAgent.indexOf("Windows NT 6.0") != -1) OSName="windows";
 			if (window.navigator.userAgent.indexOf("Windows NT 5.1") != -1) OSName="windows";
 			if (window.navigator.userAgent.indexOf("Windows NT 5.0") != -1) OSName="windows";
+			if (window.navigator.userAgent.indexOf("Windows") != -1) OSName="windows";
 			if (window.navigator.userAgent.indexOf("Mac")            != -1) OSName="ios";
 			if (window.navigator.userAgent.indexOf("X11")            != -1) OSName="UNIX";
 			if (window.navigator.userAgent.indexOf("Linux")          != -1) OSName="linux";
