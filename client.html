@@ -49,7 +49,13 @@
 		        }
 	    	});
 			$('#btn-input').keypress(function(e) {
+				
 				if (e.keyCode == 13 && this.value) {
+					var text = $("#btn-input").val();
+					var match = /\r|\n/.exec(text);
+					if (match && $( "#btn-input" )[0].textLength ==1) {
+						return false;
+					}
 					$("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p><b>'+$('#chat_name').val()+'</b><br>'+ this.value +'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
 					
 					sendSms($(this).val());
@@ -59,6 +65,7 @@
 					$('#mytime').attr('client','0');
 					$('#liker').css('display','block');
 					$('#footer_menu').prop('disabled', false);
+					return false;
 				}
 			});
 			jQuery("time.timeago").timeago();
@@ -525,6 +532,11 @@
 	    
 	    $(document).on("click", "#sendbtn", function () {
 	    	if($('#btn-input').val() !=''){
+	    		var text = $("#btn-input").val();
+				var match = /\r|\n/.exec(text);
+				if (match && $( "#btn-input" )[0].textLength ==1) {
+					return false;
+				}
 	    		var vl = $('#btn-input').val();
 			    $("#log").append('<div class="row msg_container base_sent"><div class="col-md-20 col-xs-12"><div class="messages msg_sent"><p><b>'+$('#chat_name').val()+'</b><br>'+ vl +'</p><time class="timeago" datetime="'+getDateTime()+'"></time></div></div><div class="col-md-2 col-xs-1 avatar"><img src="user.png" class=" img-responsive "></div></div>');
 			    sendSms(vl);
